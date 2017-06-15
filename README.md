@@ -1,5 +1,7 @@
-#Dot Files
-##
+# Dot Files
+
 """
-###tmux configure
-###bash configure
+
+## tmux configure
+
+## bash configure
