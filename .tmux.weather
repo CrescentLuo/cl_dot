@@ -1,0 +1,2 @@
+#!/bin/bash
+(curl -s "wttr.in/shanghai?Q0T" 2>&1 | awk '{if(NR==2){print $(NF-1) $(NF-0)};if(NR==1){print$(NF-0)}}')
