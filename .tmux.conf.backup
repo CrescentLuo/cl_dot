@@ -24,7 +24,7 @@ set -g status-fg white
 set -g status-interval 5
 set -g status-left-length 200
 set -g status-right-length 60
-set -g status-left "#[fg=Green]#(whoami)#[fg=white]::#[fg=blue]#(hostname -s)#[fg=white]::##[fg=yellow]#(bash ~/.tmux.weather|cat| xargs)"
+set -g status-left "#[fg=Green]#(whoami)#[fg=white]::#[fg=blue]#(hostname -s)#[fg=white]::##[fg=yellow]#(bash ~/.tmux.weather|xargs)"
 set -g status-justify left
 #set -g status-right '#[fg=Cyan]#S #[fg=white]%ate] %d %b %R'
 set -g status-right '#{prefix_highlight}|#{cpu_fg_color}CPU:#{cpu_icon}#{cpu_percentage}#[bg=black]:: %a %Y-%m-%d %H:%M'

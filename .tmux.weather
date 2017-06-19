@@ -1,2 +1,12 @@
 #!/bin/bash
-(curl -s "wttr.in/shanghai?Q0T" 2>&1 | awk '{if(NR==2){print $(NF-1) $(NF-0)};if(NR==1){print$(NF-0)}}')
+last_modify="$(stat WeatherToday.tmux |grep "Modify" | cut -d ' ' -f 2)"
+DATE="$(date +%Y-%m-%d)"
+#session_name=$(tmux display-message -p "#S")
+#start=$(tmux ls -F '#S #{session_created}' | awk -v name="$session_name" '$1==name{print $2}')
+#last_activity=$(tmux ls -F '#S #{session_activity}' | awk -v name="$session_name" '$1==name{print $2}')
+if [[ ${DATE} != ${last_modify} ]]; then
+    weather=$(curl -s "wttr.in/shanghai?Q0T&?lang=zh" 2>&1 | awk '{if(NR==2){print $(NF-1) $(NF-0)};if(NR==1){print$(NF-0)}}')
+    echo $weather > WeatherToday.tmux
+    echo "Yes"
+fi
+cat WeatherToday.tmux
