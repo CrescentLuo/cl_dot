@@ -19,11 +19,12 @@ shift $((OPTIND -1))
 
 sbatch_header (){
 	# get parameters
-	nodes=${1:-1}
-	time=${2:-4}
-	time=$(($time * 3600))
-	time=`date -u -r $time +%T`
-	job_name=${3:-"sbatch_job"}
+	nodes=${1}
+	time=${2}
+	#time=$(($time * 3600))
+	#time=`date -u -r $time +%T`
+	time=`perl -se 'printf("%02d:%02d:%02d", $time, 0, 0)' -- -time=$time`
+	job_name=${3}
 	echo "#!/bin/bash"
 	echo "#SBATCH --nodes=${nodes}"
 	echo "#SBATCH --time=${time}"
@@ -41,10 +42,6 @@ usage_array (){
 }
 
 
-job_name=""
-array_len=1
-nodes=""
-job_time=""
 
 subcommend=$1; shift # Remove 'sbinit' from the argument list
 case "$subcommend" in
@@ -79,8 +76,9 @@ case "$subcommend" in
 			esac
 		done
 		shift $((OPTIND -1))
-		sbatch_header $nodes $job_time $job_name
-		echo "#SBATCH --array=1-${array_len}%20"
+		echo $nodes
+		sbatch_header ${nodes:-1} ${job_time:-4} ${job_name:-"array_job"}
+		echo "#SBATCH --array=1-${array_len:-1}%20"
 		;;
 	sbatch)
 		sbatch_header
