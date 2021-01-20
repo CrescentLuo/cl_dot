@@ -76,7 +76,6 @@ case "$subcommend" in
 			esac
 		done
 		shift $((OPTIND -1))
-		echo $nodes
 		sbatch_header ${nodes:-1} ${job_time:-4} ${job_name:-"array_job"}
 		echo "#SBATCH --array=1-${array_len:-1}%20"
 		;;
