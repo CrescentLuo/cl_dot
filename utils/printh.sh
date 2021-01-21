@@ -13,7 +13,7 @@ while getopts "hf:" option; do
 			shift
 			file=$1;shift
 			firstline=`sed -n 2p $file`
-			awk -v firstline="$firstline" '{OFS="\t";split(firstline,a,"\t");for(i=1;i<=NF;i++){print i,$i,a[i]}}' $file |head
+			awk -F "\t" -v firstline="$firstline" '{OFS="\t";split(firstline,a,"\t");for(i=1;i<=NF;i++){print i,$i,a[i]}}' $file |head
 			exit 0
 			;;
 		\? )
@@ -28,4 +28,4 @@ while getopts "hf:" option; do
 	shift $((OPTIND -1))
 done
 file=$1;shift
-awk '{OFS="\t";for(i=1;i<=NF;i++){print i,$i}}' $file |head
+awk -F "\t" '{OFS="\t";for(i=1;i<=NF;i++){print i,$i}}' $file |head
