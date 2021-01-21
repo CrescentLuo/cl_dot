@@ -28,4 +28,4 @@ while getopts "hf:" option; do
 	shift $((OPTIND -1))
 done
 file=$1;shift
-head -n1 $file | awk -F "\t" '{OFS="\t";for(i=1;i<=NF;i++){print i,$i}}' $file
+head -n1 $file | awk -F "\t" '{OFS="\t";for(i=1;i<=NF;i++){print i,$i}}'
