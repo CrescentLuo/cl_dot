@@ -25,7 +25,8 @@ while getopts "hf:" option; do
 			exit 1
 			;;
 	esac
-	shift $((OPTIND -1))
 done
+shift $((OPTIND -1))
+
 file=$1;shift
 head -n1 $file | awk -F "\t" '{OFS="\t";for(i=1;i<=NF;i++){print i,$i}}'

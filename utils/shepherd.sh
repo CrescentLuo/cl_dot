@@ -29,10 +29,10 @@ while getopts ":hs:n:m:" opt; do
 			exit 1
 			;;
 	esac
-	shift $((OPTIND -1))
 done
-
+shift $((OPTIND -1))
 job_name=${job_name:-"shepherd_job"}
+
 
 if [ -e ${job_name}.log ];then
     rm ${job_name}.log
@@ -42,13 +42,14 @@ sleep 1
 
 task_len=`wc -l $script | awk '{print $1}'`
 
+echo ${max_job}
 max_jobs=${max_job:-4}
 FIFO_FILE="./$$.fifo"
 mkfifo $FIFO_FILE
 exec 6<>$FIFO_FILE
 rm -f $FIFO_FILE
 
-for((i=1; i<=$max_jobs; i++));do
+for((i=1; i<=${max_jobs}; i++));do
     echo
 done >&6
 
