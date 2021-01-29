@@ -42,7 +42,6 @@ sleep 1
 
 task_len=`wc -l $script | awk '{print $1}'`
 
-echo ${max_job}
 max_jobs=${max_job:-4}
 FIFO_FILE="./$$.fifo"
 mkfifo $FIFO_FILE
@@ -53,7 +52,6 @@ for((i=1; i<=${max_jobs}; i++));do
     echo
 done >&6
 
-echo ${task_len}
 
 for((i=1; i<=${task_len}; i++));do
 	read -u6
