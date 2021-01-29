@@ -58,7 +58,8 @@ for((i=1; i<=${task_len}; i++));do
 	read -u6
 	{
 		{
-			sed -n ${i}p $script
+			cmd=`sed -n ${i}p $script`
+			eval $cmd
 			echo `date` "starting job ${i}">> ${job_name}.log 
 		} && {
 			echo `date` "finish job ${i}" >> ${job_name}.log
