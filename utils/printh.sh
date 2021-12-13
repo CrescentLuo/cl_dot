@@ -1,5 +1,5 @@
 #!/bin/bash
-delimiter=" "
+delimiter="\ "
 while getopts ":d:hf:" option; do
 	case ${option} in 
 		h ) # display help
