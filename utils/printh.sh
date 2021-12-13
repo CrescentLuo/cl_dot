@@ -1,5 +1,5 @@
 #!/bin/bash
-delimiter="\ "
+delimiter=" "
 while getopts ":d:hf:" option; do
 	case ${option} in 
 		h ) # display help
@@ -18,7 +18,7 @@ while getopts ":d:hf:" option; do
 			shift
 			file=$1;shift
 			firstline=`sed -n 2p $file`
-			head -n1 $file | awk -F ${delimiter} -v firstline="$firstline" '{OFS="\t";split(firstline,a,"\t");for(i=1;i<=NF;i++){print i,$i,a[i]}}' 
+			head -n1 $file | awk -F "$delimiter" -v firstline="$firstline" '{OFS="\t";split(firstline,a,"\t");for(i=1;i<=NF;i++){print i,$i,a[i]}}' 
 			exit 0
 			;;
 		
@@ -35,4 +35,4 @@ done
 shift $((OPTIND -1))
 
 file=$1;shift
-head -n1 $file | awk -F ${delimiter} '{OFS="\t";for(i=1;i<=NF;i++){print i,$i}}'
+head -n1 $file | awk -F "$delimiter" '{OFS="\t";for(i=1;i<=NF;i++){print i,$i}}'
