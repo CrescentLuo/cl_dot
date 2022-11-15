@@ -33,3 +33,6 @@ autoload -U colors && colors
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+LC_CTYPE=en_US.UTF-8
+LC_ALL=en_US.UTF-8
