@@ -78,7 +78,7 @@ format = '[ $user ]($style)'
 [hostname]
 ssh_only = false
 style = "bg:color_orange fg:color_fg0"
-format = '@ [$hostname]($style) '
+format = '[@ $hostname]($style)'
 trim_at = '.local'
 disabled = false
 
