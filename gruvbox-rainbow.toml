@@ -10,6 +10,7 @@ $directory\
 $git_branch\
 $git_status\
 [](fg:color_aqua bg:color_blue)\
+$conda\
 $c\
 $rust\
 $golang\
@@ -18,7 +19,6 @@ $php\
 $java\
 $kotlin\
 $haskell\
-$python\
 [](fg:color_blue bg:color_bg3)\
 $docker_context\
 [](fg:color_bg3 bg:color_bg1)\
@@ -26,7 +26,10 @@ $time\
 [ ](fg:color_bg1)\
 $line_break$character"""
 
+add_newline = false
+
 palette = 'gruvbox_dark'
+
 
 [palettes.gruvbox_dark]
 color_fg0 = '#fbf1c7'
@@ -83,6 +86,11 @@ truncation_symbol = "…/"
 "Music" = "󰝚 "
 "Pictures" = " "
 "Developer" = "󰲋 "
+
+[conda]
+symbol = "🅒 "
+style = "bg:color_blue"
+format = '[[ $symbol( $environment) ](fg:color_fg0 bg:color_blue)]($style)'
 
 [git_branch]
 symbol = ""
