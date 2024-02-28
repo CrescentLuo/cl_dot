@@ -2,6 +2,8 @@ eval "$(starship init zsh)"
 eval "$(/opt/homebrew/bin/brew shellenv)"
 
 
+[[ -f ~/.zsh/aliases.zsh ]] && source ~/.zsh/aliases.zsh
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('/Users/zluo/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
