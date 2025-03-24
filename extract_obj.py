@@ -6,6 +6,8 @@ from pptx import Presentation
 import zipfile
 import binwalk
 import json
+import pandas as pd
+import altair as alt
 
 
 def binwalk_scan(file_in, quiet=True):
@@ -67,37 +69,87 @@ def extract_prism_files(filepath):
     return extracted_files
 
 
-def extract_data(file_path):
-    data_folder = pathlib.Path(file_path) / "data"
-    sheets = data_folder / "sheets"
-    sheet_meta = {}
-    for sub_dir in sheets.iterdir():
-        sheet_json = sub_dir / "sheet.json"
-        if sheet_json.exists():
-            with open(sheet_json) as json_file:
-                sheet_meta[sub_dir.name] = json.load(json_file)
+class ExtractedBin:
+    def __init__(self, file_path):
+        self.file_path = pathlib.Path(file_path)
+        self.sheets = list()
+        self.tables = list()
 
-    return sheet_meta
+    def extract_sheets(self):
+        data_folder = pathlib.Path(self.file_path) / "data"
+        sheets = data_folder / "sheets"
+        for sub_dir in sheets.iterdir():
+            sheet_json = sub_dir / "sheet.json"
+            if sheet_json.exists():
+                with open(sheet_json) as json_file:
+                    self.sheets.append(json.load(json_file))
+
+    def extact_table_dataSets(self, uid):
+        sets_folder = self.file_path / "data" / "sets"
+        sets_json_path = sets_folder / "{}.json".format(uid)
+        with open(sets_json_path) as json_file:
+            sets_meta = json.load(json_file)
+            return {
+                uid: {
+                    "fenID": sets_meta["fenID"],
+                    "setName": sets_meta["title"]["string"],
+                }
+            }
+
+    def extract_table(self):
+        if not self.sheets:
+            self.extract_sheets()
+        for sheet_meta in self.sheets:
+            sheet_id = sheet_meta["$id"]
+            sheet_uid = sheet_meta["uid"]
+            table = sheet_meta["table"]
+            table_uid = sheet_meta["table"]["uid"]
+            dataSets = sheet_meta["table"]["dataSets"]
+            repCnt = sheet_meta["table"]["replicatesCount"]
+            header_row = []
+            for set_uid in dataSets:
+                set_meta = self.extact_table_dataSets(set_uid)
+                for i in range(repCnt):
+                    header_row.append(set_meta[set_uid]["setName"] + f"_rep{i}")
+            table_file_path = (
+                self.file_path / "data" / "tables" / table_uid / "data.csv"
+            )
+            csv_table = pd.read_csv(table_file_path, header=None, names=header_row)
+            csv_table.dropna(how="all", inplace=True)
+            csv_table = (
+                csv_table.rename_axis("LNP")
+                .reset_index()
+                .melt(id_vars="LNP", var_name="Tissue", value_name="value")
+            )
+            csv_table[["Tissue", "rep"]] = csv_table["Tissue"].str.split(
+                pat="_", expand=True
+            )
+            self.tables.append(csv_table)
 
 
-def extact_table_dataSets(file_path, uid):
-    sets_folder = file_path / "data" / "sets"
-    sets_json_path = sets_folder / "{}".format(uid)
-    with open(sets_json_path) as json_file:
-        sets_meta = json.load(json_file)
-        return 
-
-
-def extract_table(file_path, meta):
-    sheet_id = meta["$id"]
-    sheet_uid = meta["uid"]
-    table = meta["table"]
-    table_uid = meta["table"]["uid"]
-    dataSets = meta["table"]["dataSets"]
-    repCnt = meta["table"]["replicatesCount"]
-    header_row = []
-    for set_uid in dataSets:
-        
+def plot_table(table, file_path=None):
+    bar_chart = (
+        alt.Chart(table)
+        .mark_bar()
+        .encode(
+            x="Tissue:O",
+            y=alt.Y("mean(value):Q", scale=alt.Scale(type="log")).title("Mean value"),
+            color="Tissue:N",
+        )
+    )
+    point_chart = (
+        alt.Chart(table)
+        .mark_circle()
+        .encode(
+            x="Tissue:O",
+            y=alt.Y("value:Q", scale=alt.Scale(type="log")),
+            color="Tissue:N",
+        )
+    )
+    alt_chart = alt.layer(bar_chart, point_chart).facet(column="LNP:N")
+    if file_path:
+        alt_chart.save(file_path)
+    return alt_chart
 
 
 if __name__ == "__main__":
@@ -107,5 +159,7 @@ if __name__ == "__main__":
 
     # file_path = sys.argv[1]
     # extract_prism_files(file_path)
-    meta = extract_data(sys.argv[1])
-    print(meta)
+    extracted_set = ExtractedBin(sys.argv[1])
+    extracted_set.extract_table()
+    print(extracted_set.tables[0])
+    plot_table(extracted_set.tables[0], "./test.svg")
