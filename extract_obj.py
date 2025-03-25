@@ -19,8 +19,9 @@ def binwalk_scan(file_in, quiet=True):
         results = binwalk.scan(
             file_in,
             signature=True,
+            signature_exclude=['misc']
             quiet=quiet,
-            extract=False,
+            extract=True,
             directory=str(destination_path),
         )
         for module in results:
@@ -54,6 +55,11 @@ def extract_prism_files(filepath):
                 bytes_io = io.BytesIO(blob)
 
                 is_zip = zipfile.is_zipfile(bytes_io)
+                if not is_zip:
+                    start_pos = blob.find(b"PK")
+                    end_sequence = b"PK\x05\x06"
+                    end_pos = blob.rfind(end_sequence)
+                    blob = blob[start_pos : end_pos + 22]
                 filename = f"slide_{slide_number}_id_{shape_id}.bin"
                 filename = input_file_directory / filename
                 with open(filename, "wb") as f:
