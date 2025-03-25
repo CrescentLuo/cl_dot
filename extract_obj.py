@@ -8,6 +8,7 @@ import binwalk
 import json
 import pandas as pd
 import altair as alt
+import logging
 
 
 def binwalk_scan(file_in, quiet=True):
@@ -15,12 +16,11 @@ def binwalk_scan(file_in, quiet=True):
         # Set a custom extraction directory relative to the input file's directory
         destination_path = pathlib.Path(file_in).parent / "extracted_files"
         destination_path.mkdir(exist_ok=True)
-        print("Yes")
         results = binwalk.scan(
             file_in,
             signature=True,
             quiet=quiet,
-            extract=True,
+            extract=False,
             directory=str(destination_path),
         )
         for module in results:
@@ -30,7 +30,7 @@ def binwalk_scan(file_in, quiet=True):
                     print(f"  Extracted to: {result.file.name}")
                 print("---------------")
     except Exception as e:
-        print(f"Error: {e}")
+        logging.info(f"Error: {e}")
 
 
 def extract_prism_files(filepath):
@@ -56,10 +56,11 @@ def extract_prism_files(filepath):
                 is_zip = zipfile.is_zipfile(bytes_io)
                 filename = f"slide_{slide_number}_id_{shape_id}.bin"
                 filename = input_file_directory / filename
-                # start_pos = blob.find(b"PK")
-                # end_sequence = b"PK\x05\x06"
-                # end_pos = blob.rfind(end_sequence)
-                # blob = blob[start_pos : end_pos + 22]
+                if not is_zip:
+                    start_pos = blob.find(b"PK")
+                    end_sequence = b"PK\x05\x06"
+                    end_pos = blob.rfind(end_sequence)
+                    blob = blob[start_pos : end_pos + 22]
                 with open(filename, "wb") as f:
                     f.write(blob)
                 print(filename)
@@ -76,13 +77,18 @@ class ExtractedBin:
         self.tables = list()
 
     def extract_sheets(self):
+        print(f"extracting sheet.json")
         data_folder = pathlib.Path(self.file_path) / "data"
         sheets = data_folder / "sheets"
         for sub_dir in sheets.iterdir():
+            print(sub_dir)
             sheet_json = sub_dir / "sheet.json"
             if sheet_json.exists():
-                with open(sheet_json) as json_file:
-                    self.sheets.append(json.load(json_file))
+                try:
+                    with open(sheet_json) as json_file:
+                        self.sheets.append(json.load(json_file))
+                except json.JSONDecodeError as e:
+                    logging.error(f"Error decoding JSON in {sheet_json}: {e}")
 
     def extact_table_dataSets(self, uid):
         sets_folder = self.file_path / "data" / "sets"
@@ -92,7 +98,11 @@ class ExtractedBin:
             return {
                 uid: {
                     "fenID": sets_meta["fenID"],
-                    "setName": sets_meta["title"]["string"],
+                    "setName": (
+                        sets_meta["title"]["string"]
+                        if isinstance(sets_meta["title"], dict)
+                        else sets_meta["title"]
+                    ),
                 }
             }
 
@@ -157,9 +167,16 @@ if __name__ == "__main__":
         print("Usage: extract_obj <file_path>")
         sys.exit(1)
 
-    # file_path = sys.argv[1]
-    # extract_prism_files(file_path)
-    extracted_set = ExtractedBin(sys.argv[1])
-    extracted_set.extract_table()
-    print(extracted_set.tables[0])
-    plot_table(extracted_set.tables[0], "./test.svg")
+    file_path = sys.argv[1]
+    file_path = pathlib.Path(file_path)
+    print(file_path, file_path.suffix)
+    if file_path.suffix == ".pptx":
+        print(file_path)
+        extract_prism_files(file_path)
+    bin_file_folder = file_path.parent / "extracted_files"
+    for bin_file in bin_file_folder.glob("*.bin.extracted"):
+        logging.info(f"Processing {bin_file}")
+        extracted_set = ExtractedBin(bin_file)
+        extracted_set.extract_table()
+    # print(extracted_set.tables[0])
+    # plot_table(extracted_set.tables[0], "./test.svg")
