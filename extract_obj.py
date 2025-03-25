@@ -56,11 +56,6 @@ def extract_prism_files(filepath):
                 is_zip = zipfile.is_zipfile(bytes_io)
                 filename = f"slide_{slide_number}_id_{shape_id}.bin"
                 filename = input_file_directory / filename
-                if not is_zip:
-                    start_pos = blob.find(b"PK")
-                    end_sequence = b"PK\x05\x06"
-                    end_pos = blob.rfind(end_sequence)
-                    blob = blob[start_pos : end_pos + 22]
                 with open(filename, "wb") as f:
                     f.write(blob)
                 print(filename)
@@ -77,18 +72,13 @@ class ExtractedBin:
         self.tables = list()
 
     def extract_sheets(self):
-        print(f"extracting sheet.json")
         data_folder = pathlib.Path(self.file_path) / "data"
         sheets = data_folder / "sheets"
         for sub_dir in sheets.iterdir():
-            print(sub_dir)
             sheet_json = sub_dir / "sheet.json"
             if sheet_json.exists():
-                try:
-                    with open(sheet_json) as json_file:
-                        self.sheets.append(json.load(json_file))
-                except json.JSONDecodeError as e:
-                    logging.error(f"Error decoding JSON in {sheet_json}: {e}")
+                with open(sheet_json) as json_file:
+                    self.sheets.append(json.load(json_file))
 
     def extact_table_dataSets(self, uid):
         sets_folder = self.file_path / "data" / "sets"
@@ -98,11 +88,7 @@ class ExtractedBin:
             return {
                 uid: {
                     "fenID": sets_meta["fenID"],
-                    "setName": (
-                        sets_meta["title"]["string"]
-                        if isinstance(sets_meta["title"], dict)
-                        else sets_meta["title"]
-                    ),
+                    "setName": sets_meta["title"]["string"],
                 }
             }
 
@@ -136,6 +122,12 @@ class ExtractedBin:
             )
             self.tables.append(csv_table)
 
+    def save_tables(self):
+        for idx, sheet_meta in enumerate(self.sheets):
+            self.tables[idx].to_csv(
+                f"{self.file_path.parent}/Page_{self.slide_number}_Shape_{self.shape_id}_{idx}.csv"
+            )
+
 
 def plot_table(table, file_path=None):
     bar_chart = (
@@ -168,15 +160,11 @@ if __name__ == "__main__":
         sys.exit(1)
 
     file_path = sys.argv[1]
-    file_path = pathlib.Path(file_path)
-    print(file_path, file_path.suffix)
-    if file_path.suffix == ".pptx":
-        print(file_path)
-        extract_prism_files(file_path)
-    bin_file_folder = file_path.parent / "extracted_files"
-    for bin_file in bin_file_folder.glob("*.bin.extracted"):
-        logging.info(f"Processing {bin_file}")
-        extracted_set = ExtractedBin(bin_file)
+    bin_file_path = extract_prism_files(file_path)
+    print(bin_file_path)
+    for extracted_files_dir in bin_file_path:
+        extracted_set = ExtractedBin(extracted_files_dir)
         extracted_set.extract_table()
+        extracted_set.save_tables()
     # print(extracted_set.tables[0])
     # plot_table(extracted_set.tables[0], "./test.svg")
