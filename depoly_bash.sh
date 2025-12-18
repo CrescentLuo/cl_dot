@@ -39,16 +39,16 @@ fi
 
 # Function to deploy config file
 deploy_file() {
-    local source="${SOURCE_DIR}/$1"
-    local dest="${HOME}/.$1"
+    local source="${SOURCE_DIR}/${1}"
+    local dest="${HOME}/.${1}"
     
-    [ -f "${dest}" ] && cp "${dest}" "${BACKUP_DIR}/$1.$(date +%Y%m%d_%H%M%S)"
+    [ -f "${dest}" ] && cp "${dest}" "${BACKUP_DIR}/${1}.$(date +%Y%m%d_%H%M%S)"
     
     if [ -f "${source}" ]; then
-        echo "Deploying .$1"
+        echo "Deploying .${1}"
         cp "${source}" "${dest}"
     else
-        echo "Warning: $1 not found"
+        echo "Warning: ${1} not found"
         [ "$2" = "required" ] && exit 1
     fi
 }
