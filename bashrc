@@ -1,5 +1,5 @@
 # Path management
-export PATH="/data/corp/zheng.luo/.local/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
 
 # Set starship init and config
 eval "$(starship init bash)"
