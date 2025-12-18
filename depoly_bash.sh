@@ -3,20 +3,20 @@
 # Deploy bashrc configuration script
 
 # Install starship if needed
-if ! command -v ~/.local/bin/starship &> /dev/null; then
+if ! command -v starship &> /dev/null; then
     echo "Installing starship..."
     mkdir -p ~/.local/bin
     curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin
     
-    # Wait for installation to complete and verify
-    if command -v ~/.local/bin/starship &> /dev/null; then
-        echo "starship installed successfully: $(starship --version)"
+    # Verify installation
+    if [ -f ~/.local/bin/starship ]; then
+        echo "starship installed successfully"
     else
         echo "starship installation failed"
         exit 1
     fi
 else
-    echo "starship is installed: $(starship --version)"
+    echo "starship is installed"
 fi
 
 
