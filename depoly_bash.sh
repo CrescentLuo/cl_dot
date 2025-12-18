@@ -19,20 +19,23 @@ else
     echo "starship is installed: $(starship --version)"
 fi
 
-# Setup starship theme
-STARSHIP_CONFIG_DIR="${HOME}/.config"
-mkdir -p "${STARSHIP_CONFIG_DIR}"
-if [ -f "${SOURCE_DIR}/gruvbox-rainbow.toml" ]; then
-    echo "Deploying starship theme..."
-    cp -f "${SOURCE_DIR}/gruvbox-rainbow.toml" "${STARSHIP_CONFIG_DIR}/starship.toml"
-else
-    echo "Warning: gruvbox-rainbow.toml not found"
-fi
 
 # Setup paths
 SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="${HOME}/.config_backups"
 mkdir -p "${BACKUP_DIR}"
+
+# Setup starship theme
+STARSHIP_CONFIG_DIR="${HOME}/.config"
+mkdir -p "${STARSHIP_CONFIG_DIR}" && touch "${STARSHIP_CONFIG_DIR}/starship.toml"
+if [ -f "${SOURCE_DIR}/gruvbox-rainbow.toml" ]; then
+    echo "Deploying starship theme..."
+    cp "${SOURCE_DIR}/gruvbox-rainbow.toml" "${STARSHIP_CONFIG_DIR}/starship.toml"
+else
+    echo "Warning: gruvbox-rainbow.toml not found"
+fi
+
+
 
 # Function to deploy config file
 deploy_file() {
