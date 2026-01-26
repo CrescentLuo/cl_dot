@@ -23,3 +23,11 @@ ToDo list:
 
 
 ## bash configure
+
+
+## OSS utils 
+
+```bash
+ossutil ls oss_path -e endpoint -i accessKeyID -k accessKeySecret
+ossutil cp -rfu oss_path local_dir  -e endpoint -i accessKeyID -k accessKeySecret
+```
