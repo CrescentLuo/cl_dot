@@ -2,3 +2,4 @@
 *.pzfx
 *.pzf
 dify_api_token.json
+utils/opencode_addon_*.py
